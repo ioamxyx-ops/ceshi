@@ -1,0 +1,31 @@
+name: Repository checks
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  baseline:
+    name: Baseline checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Validate required files
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s README.md
+          test -s .gitignore
+          test -s .github/workflows/ci.yml
+      - name: Validate Markdown files are non-empty
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r -d '' file; do
+            test -s "$file"
+          done < <(find . -type f -name '*.md' -not -path './.git/*' -print0)
